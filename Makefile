@@ -1,3 +1,6 @@
+IMAGE ?= quay.io/osb-starter-pack/servicebroker
+TAG ?= $(shell git describe --tags --always)
+
 build:
 	go build -i github.com/pmorie/osb-starter-pack/cmd/servicebroker
 
@@ -10,13 +13,13 @@ linux:
 
 image: linux
 	cp servicebroker image/
-	docker build image/ -t quay.io/osb-starter-pack/servicebroker
+	docker build image/ -t "$(IMAGE):$(TAG)"
 
 clean:
 	rm -f servicebroker
 
 push: image
-	docker push quay.io/osb-starter-pack/servicebroker:latest
+	docker push "$(IMAGE):$(TAG)"
 
 deploy-helm: image
 	helm install charts/servicebroker \
@@ -26,3 +29,5 @@ deploy-helm: image
 deploy-openshift: image
 	oc new-project osb-starter-pack
 	oc process -f openshift/starter-pack.yaml | oc create -f -
+
+.PHONY: build test linux image clean push deploy-help deploy-openshift
